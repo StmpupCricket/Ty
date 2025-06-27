@@ -16,25 +16,27 @@ app.get('/api/quiz', async (req, res) => {
     const now = Date.now();
     const interval = data.interval_seconds * 1000;
     const diff = now - startTime;
-    const index = Math.floor(diff / interval);
 
-    if (index < 0 || index >= data.questions.length) {
-      return res.json({ message: "🛑 Quiz not started yet or finished!" });
+    if (diff < 0) {
+      return res.json({ message: "🕐 Quiz has not started yet!" });
     }
 
-    const question = data.questions[index];
+    const index = Math.floor(diff / interval);
+    const loopIndex = index % data.questions.length; // 🔁 looping here
+    const question = data.questions[loopIndex];
     const timeLeft = interval - (diff % interval);
 
     res.json({
-      current_index: index + 1,
+      current_index: loopIndex + 1,
       question,
       time_left: timeLeft
     });
+
   } catch (error) {
     res.status(500).json({ error: "Something went wrong!", detail: error.message });
   }
 });
 
 app.listen(3000, () => {
-  console.log("✅ Quiz API running on port 3000");
+  console.log("✅ Quiz API running with loop on port 3000");
 });
